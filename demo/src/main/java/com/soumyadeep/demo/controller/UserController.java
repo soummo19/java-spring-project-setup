@@ -1,4 +1,4 @@
-package com.soumyadeep.controller;
+package com.soumyadeep.demo.controller;
 
 import com.soumyadeep.demo.repository.UserRepository;
 
