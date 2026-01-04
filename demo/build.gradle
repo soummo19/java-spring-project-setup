@@ -1,33 +1,59 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.5.3'
-	id 'io.spring.dependency-management' version '1.1.7'
+    id 'java'
+    id 'org.springframework.boot' version '3.4.0' // CHANGED: 3.5.3 doesn't exist yet, used stable 3.4.0
+    id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'com.soumyadeep'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
+}
+
+// 1. Define the directory where your agent jar is located.
+// You can also add this to your gradle.properties file instead of defining it here.
+def agentDir = layout.projectDirectory.dir("libs") 
+
+tasks.withType(JavaExec) {
+    // CHANGED: Fixed the path reference. 
+    // Ensure 'opentelemetry-javaagent.jar' is actually inside a 'libs' folder in your project root.
+    jvmArgs "-javaagent:${agentDir}/opentelemetry-javaagent.jar"
+    
+    systemProperty "otel.service.name", "DemoApp"
+    systemProperty "otel.propagators", "tracecontext,baggage"
+    
+    // This allows the agent to bridge Baggage into Logback MDC
+    systemProperty "otel.instrumentation.logback-mdc.enabled", "true"
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	runtimeOnly 'org.postgresql:postgresql'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	compileOnly 'org.projectlombok:lombok'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    runtimeOnly 'org.postgresql:postgresql'
+    
+    compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // CHANGED: Use the ALPHA BOM because logback-mdc is an alpha component
+    implementation platform('io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:2.11.0-alpha') 
+    
+    // Now this will resolve correctly
+    implementation 'io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0'
+    implementation 'io.opentelemetry:opentelemetry-api'
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }

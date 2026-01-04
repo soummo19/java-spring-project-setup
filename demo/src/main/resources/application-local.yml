@@ -5,7 +5,7 @@ spring:
     password: password
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 30
+      maximum-pool-size: 50
       minimum-idle: 10
       idle-timeout: 600000
       max-lifetime: 1800000
@@ -23,9 +23,9 @@ spring:
 
 logging:
   level:
-    root: DEBUG
-    org.springframework.boot.autoconfigure.jdbc: DEBUG
-    com.zaxxer.hikari: DEBUG
+    root: INFO
+    org.springframework.boot.autoconfigure.jdbc: INFO
+    com.zaxxer.hikari: INFO
 
 
 server:
