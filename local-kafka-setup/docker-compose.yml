@@ -29,21 +29,66 @@ services:
     hostname: kafka
     depends_on:
       - zookeeper
-    user: "root"                  
+    user: "root"
     ports:
       - "9093:9093"
     volumes:
       - kafka_data:/tmp/kafka-logs
       - ./certs:/etc/kafka/certs:ro
       - ./server.properties:/opt/kafka/config/server.properties:ro
-    
-    # Bypass the broken Docker bash scripts and boot Kafka directly
     entrypoint:
       - /opt/kafka/bin/kafka-server-start.sh
       - /opt/kafka/config/server.properties
 
+
+  kafka-kraft:
+    image: apache/kafka:3.7.2
+    container_name: kafka-kraft
+    hostname: kafka-kraft
+    user: "root"
+    ports:
+      - "9095:9095" # Externally accessible on 9095 to prevent collision
+    volumes:
+      - kafka_kraft_data:/tmp/kafka-logs
+      - ./certs:/etc/kafka/certs:ro
+      - ./server-kraft.properties:/opt/kafka/config/server-kraft.properties:ro
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        /opt/kafka/bin/kafka-storage.sh format -t 5L6g3nShT-eMCtK--X86sw -c /opt/kafka/config/server-kraft.properties --ignore-formatted
+        /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server-kraft.properties
+    environment:
+      # --- KRaft Configuration ---
+      CLUSTER_ID: "5L6g3nShT-eMCtK--X86sw"
+      KAFKA_NODE_ID: "1"
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@localhost:9096"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      
+      # --- Listeners ---
+      KAFKA_LISTENERS: "SSL://0.0.0.0:9095,CONTROLLER://0.0.0.0:9096"
+      KAFKA_ADVERTISED_LISTENERS: "SSL://localhost:9095"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "SSL:SSL,CONTROLLER:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "SSL"
+
+      # --- SSL Configuration (Reusing your fixed certs!) ---
+      KAFKA_SSL_KEYSTORE_LOCATION: "/etc/kafka/certs/kafka.server.keystore.jks"
+      KAFKA_SSL_KEYSTORE_PASSWORD: "password"
+      KAFKA_SSL_KEY_PASSWORD: "password"  # Fixes the bash script bug
+      KAFKA_SSL_TRUSTSTORE_LOCATION: "/etc/kafka/certs/kafka.server.truststore.jks"
+      KAFKA_SSL_TRUSTSTORE_PASSWORD: "password"
+      KAFKA_SSL_CLIENT_AUTH: "none"
+      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "" # Fixes the localhost handshake issue
+
+      # --- Internal Settings ---
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+
 volumes:
   kafka_data:
+  kafka_kraft_data: # New volume for the KRaft broker
   zk_data:
   zk_datalog:
   pgdata:
