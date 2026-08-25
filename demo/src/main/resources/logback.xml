@@ -5,14 +5,14 @@
     <!-- Console Appender -->
     <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern> %green(%d{ISO8601}) %highlight(%-5level) [%cyan(%t)] %yellow(%C{1} - %line) [sourceIP=%blue(%X{sourceIP:-})] [X-Request-Id=%green(%X{X-Request-Id:-})] [ServiceName=%yellow(%X{ServiceName:-})] [logType=%red(%X{logType:-})] [APIEndPoint=%cyan(%X{APIEndPoint:-})] [Status=%highlight(%X{Status:-})] [Duration=%magenta(%X{Duration:-})]: %msg%n%throwable </pattern>
+            <pattern> %green(%d{ISO8601}) %highlight(%-5level) [%cyan(%t)] %yellow(%C{1} - %line) [sourceIP=%blue(%X{sourceIP:-})] [X-Request-Id=%green(%X{X-Request-Id:-})] [ServiceName=%yellow(%X{ServiceName:-})] [Activity=%cyan(%X{Activity:-})] [logType=%red(%X{logType:-})] [APIEndPoint=%cyan(%X{APIEndPoint:-})] [Status=%highlight(%X{Status:-})] [Duration=%magenta(%X{Duration:-})]: %msg%n%throwable </pattern>
         </encoder>
     </appender>
     <!-- Rolling File Appender -->
     <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOGS}/${FILE_NAME}.log</file>
         <encoder>
-            <pattern> %green(%d{ISO8601}) %highlight(%-5level) [%cyan(%t)] %yellow(%C{1} - %line) [sourceIP=%blue(%X{sourceIP:-})] [X-Request-Id=%green(%X{X-Request-Id:-})] [ServiceName=%yellow(%X{ServiceName:-})] [logType=%red(%X{logType:-})] [APIEndPoint=%cyan(%X{APIEndPoint:-})] [Status=%highlight(%X{Status:-})] [Duration=%magenta(%X{Duration:-})]: %msg%n%throwable </pattern>
+            <pattern> %green(%d{ISO8601}) %highlight(%-5level) [%cyan(%t)] %yellow(%C{1} - %line) [sourceIP=%blue(%X{sourceIP:-})] [X-Request-Id=%green(%X{X-Request-Id:-})] [ServiceName=%yellow(%X{ServiceName:-})] [Activity=%cyan(%X{Activity:-})] [logType=%red(%X{logType:-})] [APIEndPoint=%cyan(%X{APIEndPoint:-})] [Status=%highlight(%X{Status:-})] [Duration=%magenta(%X{Duration:-})]: %msg%n%throwable </pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- rollover daily and when the file reaches 200 MB -->
